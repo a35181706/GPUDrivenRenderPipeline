@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66d5e8403cc1aae4e917e3657332aac1, type: 3}
+  m_Name: GPUDRPAssets
+  m_EditorClassIdentifier: 
+  UniltShader: {fileID: 4800000, guid: f31b57e4eb9c89c4683684debbcef7ff, type: 3}
+  streamingShader: {fileID: 7200000, guid: c1cd0cb9f5eddbf489aa459bceba9e14, type: 3}
+  gpuFrustumCullingShader: {fileID: 7200000, guid: 27a4a69f28f2cb946a2de4928422fcd8,
+    type: 3}
+  HiZLODShader: {fileID: 4800000, guid: 26c0c9d0c19bd4f4d958db01aa775f53, type: 3}
+  LinearDepthShader: {fileID: 4800000, guid: 77485821d74bdd841b30cd6723eff35e, type: 3}
+  ClusterRenderShader: {fileID: 4800000, guid: 7ceb13ac5e3ea5c498c83e39587fe730, type: 3}
