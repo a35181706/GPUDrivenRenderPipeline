@@ -18,7 +18,11 @@ namespace GPUDrivenRenderPipeline
         /// HiZ的历史深度贴图
         /// </summary>
         public RenderTexture historyDepth { get; private set; }
-        public RenderTexture HiZBackUpDepthMip { get; private set; }
+
+        /// <summary>
+        /// 用于计算HiZ的mimip，临时贴图，因为RT不支持既做输入也做输出，需要一个中间RT
+        /// </summary>
+        public RenderTexture historyDepthIntermediateRT { get; private set; }
         public int2 HiZDepthSize;
 
         private int lastWidth = -1;
@@ -54,8 +58,8 @@ namespace GPUDrivenRenderPipeline
             depthBuffer.Create();
 
             //HiZ DepthBuffer
-            HiZDepthSize = 512;
-            HiZDepthSize = (int)(((float)lastHeight / lastWidth) * lastWidth);
+            HiZDepthSize.x = 512;
+            HiZDepthSize.y = (int)(((float)lastHeight / lastWidth) * HiZDepthSize.x );
 
             CoreUtil.Destroy(historyDepth);
             historyDepth = new RenderTexture(HiZDepthSize.x, HiZDepthSize.y, 0, RenderTextureFormat.R16, RenderTextureReadWrite.Linear);
@@ -67,30 +71,29 @@ namespace GPUDrivenRenderPipeline
             historyDepth.filterMode = FilterMode.Point;
             historyDepth.Create();
 
-            //HiZBackUpDepthMip
-            CoreUtil.Destroy(HiZBackUpDepthMip);
-            HiZBackUpDepthMip = new RenderTexture(HiZDepthSize.x, HiZDepthSize.y,0, RenderTextureFormat.R16, RenderTextureReadWrite.Linear);
-            HiZBackUpDepthMip.name = "HiZHiZBackUpDepthMip";
-            HiZBackUpDepthMip.useMipMap = true;
-            HiZBackUpDepthMip.autoGenerateMips = false;
-            HiZBackUpDepthMip.enableRandomWrite = false;
-            HiZBackUpDepthMip.wrapMode = TextureWrapMode.Clamp;
-            HiZBackUpDepthMip.filterMode = FilterMode.Point;
-            HiZBackUpDepthMip.Create();
+            //historyDepthIntermediateRT
+            CoreUtil.Destroy(historyDepthIntermediateRT);
+            historyDepthIntermediateRT = new RenderTexture(HiZDepthSize.x, HiZDepthSize.y,0, RenderTextureFormat.R16, RenderTextureReadWrite.Linear);
+            historyDepthIntermediateRT.name = "historyDepthIntermediateRT";
+            historyDepthIntermediateRT.useMipMap = true;
+            historyDepthIntermediateRT.autoGenerateMips = false;
+            historyDepthIntermediateRT.enableRandomWrite = false;
+            historyDepthIntermediateRT.wrapMode = TextureWrapMode.Clamp;
+            historyDepthIntermediateRT.filterMode = FilterMode.Point;
+            historyDepthIntermediateRT.Create();
 
         }
 
-        public void GenerateHiZDepthMips(CommandBuffer buffer)
+        public void GenerateHistoryDepthMips(CommandBuffer buffer)
         {
             int mipCount = 1 + (int)Mathf.Log(Mathf.Max(historyDepth.width, historyDepth.height), 2.0f);
             buffer.SetGlobalTexture(ShaderID._MainTex, historyDepth);
             for (int i = 1; i < mipCount; ++i)
             {
-
                 buffer.SetGlobalInt(ShaderID._PreviousLevel, i - 1);
-                buffer.SetRenderTarget(HiZBackUpDepthMip, i);
+                buffer.SetRenderTarget(historyDepthIntermediateRT, i);
                 buffer.DrawMesh(GraphicsUtility.mesh, Matrix4x4.identity, GlobalMaterial.HiZDepthLODMat, 0, 0);
-                buffer.CopyTexture(HiZBackUpDepthMip, 0, i, historyDepth, 0, i);
+                buffer.CopyTexture(historyDepthIntermediateRT, 0, i, historyDepth, 0, i);
             }
         }
 
@@ -98,7 +101,7 @@ namespace GPUDrivenRenderPipeline
         {
             CoreUtil.Destroy(frameBuffer);
             CoreUtil.Destroy(historyDepth);
-            CoreUtil.Destroy(HiZBackUpDepthMip);
+            CoreUtil.Destroy(historyDepthIntermediateRT);
         }
     }
 

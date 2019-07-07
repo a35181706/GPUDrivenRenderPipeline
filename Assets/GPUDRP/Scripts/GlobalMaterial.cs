@@ -10,11 +10,11 @@ namespace GPUDrivenRenderPipeline
     public static class GlobalMaterial 
     {
         /// <summary>
-        /// HiZDepth LOD生成材质
+        /// HiZDepth 生成LOD
         /// </summary>
         public static Material HiZDepthLODMat { get; private set; }
         /// <summary>
-        /// 线性LOD
+        /// HiZDepth，深度归一化到0~1
         /// </summary>
         public static Material HiZLinearLODMat { get; private set; }
         /// <summary>

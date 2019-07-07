@@ -109,7 +109,8 @@ namespace GPUDrivenRenderPipeline
             context.commandbuffer.SetRenderTarget(RTBuffers.frameBuffer,RTBuffers.depthBuffer);
             context.commandbuffer.ClearRenderTarget(true, true, hostCamera.backgroundColor);
 
-            
+            context.commandbuffer.SetGlobalTexture(ShaderID._DepthBufferTexture, RTBuffers.depthBuffer);
+
             MCRExecuterManager.DrawAllExecuter(this);
              
 

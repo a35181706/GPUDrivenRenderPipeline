@@ -6,7 +6,7 @@ MCRVertex getVertex(uint vertexID, uint instanceID)
 {
 
 	instanceID = resultBuffer[instanceID];
-	uint vertexOffset = instanceID * CLUSTER_CLIP_COUNT;
+	uint vertexOffset = instanceID * CLUSTER_VERTEX_COUNT;
 	return verticesBuffer[vertexOffset + vertexID];
 }
 

@@ -4,10 +4,11 @@
 #include "Assets/GPUDRP/Scripts/MeshClusterRendering/MCRVertex.cginc"
 #include "Assets/GPUDRP/Scripts/MeshClusterRendering/MCRCluster.cginc"
 
-#define CLUSTER_CLIP_COUNT 255
-#define CLUSTER_VERTEX_COUNT 255
-#define PLANECOUNT 6
+//一个Cluster有多少个三角形
+#define CLUSTER_TRI_COUNT 64
 
+//一个cluster有多少个顶点
+#define CLUSTER_VERTEX_COUNT CLUSTER_TRI_COUNT * 3
 
 
 #ifdef COMPUTESHADER

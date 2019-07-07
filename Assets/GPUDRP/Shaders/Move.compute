@@ -25,9 +25,9 @@ void ClusterFunc(uint id : SV_DISPATCHTHREADID)
     }
 }
 
-[numthreads(1, CLUSTER_CLIP_COUNT, 1)]
+[numthreads(1, CLUSTER_VERTEX_COUNT, 1)]
 void PointFunc(uint2 id : SV_DISPATCHTHREADID)
 {
-    uint2 index = _IndexBuffer[id.x] * CLUSTER_CLIP_COUNT + id.y;
+    uint2 index = _IndexBuffer[id.x] * CLUSTER_VERTEX_COUNT + id.y;
     verticesBuffer[index.x] = verticesBuffer[index.y];
 }

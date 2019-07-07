@@ -42,7 +42,7 @@ namespace GPUDrivenRenderPipeline
             instanceCountBufferValue[0] = MCRConstant.c_CLUSTER_VERTEX_COUNT;
             context.instanceCountBuffer.SetData(instanceCountBufferValue);
             context.moveCountBuffer = new ComputeBuffer(5, Marshal.SizeOf<int>(), ComputeBufferType.IndirectArguments);
-            context.verticesBuffer = new ComputeBuffer(info.clusterCount *2 * MCRConstant.c_CLUSTER_CLIP_COUNT, Marshal.SizeOf<MCRVertex>());
+            context.verticesBuffer = new ComputeBuffer(info.clusterCount *2 * MCRConstant.c_CLUSTER_VERTEX_COUNT, Marshal.SizeOf<MCRVertex>());
             context.clusterCount = 0;
             if (useGPUOcclusCulling)
             {
@@ -125,30 +125,37 @@ namespace GPUDrivenRenderPipeline
             buffer.SetGlobalBuffer(ShaderID.verticesBuffer, context.verticesBuffer);
             buffer.SetComputeBufferParam(gpuFrustumShader, MCRConstant.ClearCluster_Kernel, ShaderID.instanceCountBuffer, context.instanceCountBuffer);
             buffer.DispatchCompute(gpuFrustumShader, MCRConstant.ClearCluster_Kernel, 1, 1, 1);
-            UpdateGPUCullingParams(context, gpudrpCamera,gpuFrustumShader, buffer);
-            //First Draw来
+
+            GPUClullingFirstCheck(context, gpudrpCamera,gpuFrustumShader, buffer);
+            //绘制
             buffer.DrawProceduralIndirect(Matrix4x4.identity, GlobalMaterial.ClusterRenderMat, 0, MeshTopology.Triangles, context.instanceCountBuffer, 0);
 
             buffer.BlitSRT(gpudrpCamera.RTBuffers.historyDepth, GlobalMaterial.HiZLinearLODMat, 0);
-
-            gpudrpCamera.RTBuffers.GenerateHiZDepthMips(buffer);
-
-            //double check
-            ClearOcclusionData(context, buffer, gpuFrustumShader);
+            gpudrpCamera.RTBuffers.GenerateHistoryDepthMips(buffer);
             gpudrpCamera.lastFrameCameraUp = gpudrpCamera.hostCamera.transform.up;
 
-            OcclusionRecheck(context, gpudrpCamera, gpuFrustumShader, buffer);
+            //第二次裁剪，避免裁剪出问题，第二次裁剪，看游戏类型，可用，可不用
+            ClearGPUClullingData(context, buffer, gpuFrustumShader);
 
-            //double draw
-            buffer.SetRenderTarget(gpudrpCamera.RTBuffers.frameBuffer);
+            GPUClullingSecondCheck(context, gpudrpCamera, gpuFrustumShader, buffer);
+
+            //绘制
+            buffer.SetRenderTarget(gpudrpCamera.RTBuffers.frameBuffer, gpudrpCamera.RTBuffers.depthBuffer);
             buffer.DrawProceduralIndirect(Matrix4x4.identity, GlobalMaterial.ClusterRenderMat, 0, MeshTopology.Triangles, context.reCheckCount, 0);
-            buffer.BlitSRT(gpudrpCamera.RTBuffers.historyDepth, GlobalMaterial.HiZLinearLODMat, 0);
-            gpudrpCamera.RTBuffers.GenerateHiZDepthMips(buffer);
 
+            buffer.BlitSRT(gpudrpCamera.RTBuffers.historyDepth, GlobalMaterial.HiZLinearLODMat, 0);
+            gpudrpCamera.RTBuffers.GenerateHistoryDepthMips(buffer);
         }
 
+        /// <summary>
+        /// GPU裁剪，第一次裁剪
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="gpudrpCamera"></param>
+        /// <param name="coreShader"></param>
+        /// <param name="buffer"></param>
 
-        public static void UpdateGPUCullingParams(MCRExecuterContext context, GPUDRPCamera gpudrpCamera,
+        public static void GPUClullingFirstCheck(MCRExecuterContext context, GPUDRPCamera gpudrpCamera,
                                                     ComputeShader coreShader, CommandBuffer buffer)
         {
             buffer.SetComputeVectorArrayParam(coreShader, ShaderID.planes, gpudrpCamera.frustumPlanes);
@@ -162,7 +169,14 @@ namespace GPUDrivenRenderPipeline
             ComputeShaderUtility.Dispatch(coreShader, buffer, MCRConstant.FrustumFilter_Kernel, context.clusterCount);
         }
 
-        public static void OcclusionRecheck(MCRExecuterContext context, GPUDRPCamera gpudrpCamera,
+        /// <summary>
+        /// GPU第二次裁剪，一般情况下可不用，当摄像机角度位置等变化比较大的情况下使用，也可以一直调用，保证物体的绘制正确，避免出问题，但会消耗更多的资源
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="gpudrpCamera"></param>
+        /// <param name="coreShader"></param>
+        /// <param name="buffer"></param>
+        public static void GPUClullingSecondCheck(MCRExecuterContext context, GPUDRPCamera gpudrpCamera,
                                             ComputeShader coreShader, CommandBuffer buffer)
         {
             buffer.SetComputeVectorParam(coreShader, ShaderID._CameraUpVector, gpudrpCamera.lastFrameCameraUp);
@@ -175,8 +189,14 @@ namespace GPUDrivenRenderPipeline
             buffer.DispatchCompute(coreShader, MCRConstant.OcclusionRecheck_Kernel, context.dispatchBuffer, 0);
         }
 
+        /// <summary>
+        /// 清除GPU裁剪数据
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="buffer"></param>
+        /// <param name="coreShader"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ClearOcclusionData(MCRExecuterContext context, CommandBuffer buffer, ComputeShader coreShader)
+        public static void ClearGPUClullingData(MCRExecuterContext context, CommandBuffer buffer, ComputeShader coreShader)
         {
             buffer.SetComputeBufferParam(coreShader, MCRConstant.ClearOcclusionData_Kernel, ShaderID.dispatchBuffer, context.dispatchBuffer);
             buffer.SetComputeBufferParam(coreShader, MCRConstant.ClearOcclusionData_Kernel, ShaderID.instanceCountBuffer, context.instanceCountBuffer);

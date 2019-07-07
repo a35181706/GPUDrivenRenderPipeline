@@ -3,7 +3,7 @@
 	SubShader
 	{
 		ZTest LEqual
-		Cull off
+		Cull back
 		Tags {"RenderType" = "Opaque" "LightMode" = "GPUDRPUnlit" }
 		Pass
 		{

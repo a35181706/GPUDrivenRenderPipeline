@@ -123,14 +123,14 @@ namespace GPUDrivenRenderPipeline
             int3 voxelCoord = 0;
             float3 lessPoint = float.MaxValue;
             float3 morePoint = float.MinValue;
-            int clusterCount = Mathf.CeilToInt((float)vertexCount / MCRConstant.c_CLUSTER_CLIP_COUNT);
-            points = new NativeList<MCRVertex>(clusterCount * MCRConstant.c_CLUSTER_CLIP_COUNT, Allocator.Temp);
+            int clusterCount = Mathf.CeilToInt((float)vertexCount / MCRConstant.c_CLUSTER_VERTEX_COUNT);
+            points = new NativeList<MCRVertex>(clusterCount * MCRConstant.c_CLUSTER_VERTEX_COUNT, Allocator.Temp);
             Clusteres = new NativeList<MCRCluster>(clusterCount, Allocator.Temp);
             //Collect all full
             for (int i = 0; i < clusterCount - 1; ++i)
             {
-                NativeList<MCRVertex> currentPoints = new NativeList<MCRVertex>(MCRConstant.c_CLUSTER_CLIP_COUNT, Allocator.Temp);
-                int lastedVertex = MCRConstant.c_CLUSTER_CLIP_COUNT / 3;
+                NativeList<MCRVertex> currentPoints = new NativeList<MCRVertex>(MCRConstant.c_CLUSTER_VERTEX_COUNT, Allocator.Temp);
+                int lastedVertex = MCRConstant.c_CLUSTER_VERTEX_COUNT / 3;
                 ref Voxel currentVoxel = ref voxels[voxelCoord.x, voxelCoord.y, voxelCoord.z];
                 int loopStart = min(currentVoxel.count, max(lastedVertex - currentVoxel.count, 0));
                 for (int j = 0; j < loopStart; j++)
@@ -199,7 +199,7 @@ namespace GPUDrivenRenderPipeline
                 currentPoints.Dispose();
             }
             //Collect and degenerate
-            NativeList<MCRVertex> leftedPoints = new NativeList<MCRVertex>(MCRConstant.c_CLUSTER_CLIP_COUNT, Allocator.Temp);
+            NativeList<MCRVertex> leftedPoints = new NativeList<MCRVertex>(MCRConstant.c_CLUSTER_VERTEX_COUNT, Allocator.Temp);
             for (int x = 0; x < voxelSize; ++x)
                 for (int y = 0; y < voxelSize; ++y)
                     for (int z = 0; z < voxelSize; ++z)
@@ -233,7 +233,7 @@ namespace GPUDrivenRenderPipeline
                 position = (morePoint + lessPoint) / 2
             };
             Clusteres.Add(lastBox);
-            for (int i = leftedPoints.Length; i < MCRConstant.c_CLUSTER_CLIP_COUNT; i++)
+            for (int i = leftedPoints.Length; i < MCRConstant.c_CLUSTER_VERTEX_COUNT; i++)
             {
                 leftedPoints.Add(new MCRVertex());
             }

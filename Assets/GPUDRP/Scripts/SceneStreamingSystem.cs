@@ -38,7 +38,7 @@ namespace GPUDrivenRenderPipeline
             mcrContext = context;
 
             clusterBuffer = new NativeArray<MCRCluster>(property.clusterCount, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-            vertexBuffer = new NativeArray<MCRVertex>(property.clusterCount * MCRConstant.c_CLUSTER_CLIP_COUNT, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+            vertexBuffer = new NativeArray<MCRVertex>(property.clusterCount * MCRConstant.c_CLUSTER_VERTEX_COUNT, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
         }
         static string[] allStrings = new string[3];
         private static byte[] bytesArray = new byte[8192];
@@ -165,14 +165,14 @@ namespace GPUDrivenRenderPipeline
             while ((targetCount = currentCount + MAXIMUMVERTCOUNT) < clusterBuffer.Length)
             {
                 mcrContext.clusterBuffer.SetData(clusterBuffer, currentCount, currentCount + mcrContext.clusterCount, MAXIMUMVERTCOUNT);
-                mcrContext.verticesBuffer.SetData(vertexBuffer, currentCount * MCRConstant.c_CLUSTER_CLIP_COUNT, (currentCount + mcrContext.clusterCount) * MCRConstant.c_CLUSTER_CLIP_COUNT, MAXIMUMVERTCOUNT * MCRConstant.c_CLUSTER_CLIP_COUNT);
+                mcrContext.verticesBuffer.SetData(vertexBuffer, currentCount * MCRConstant.c_CLUSTER_VERTEX_COUNT, (currentCount + mcrContext.clusterCount) * MCRConstant.c_CLUSTER_VERTEX_COUNT, MAXIMUMVERTCOUNT * MCRConstant.c_CLUSTER_VERTEX_COUNT);
                 currentCount = targetCount;
                 yield return null;
             }
 
             //TODO
             mcrContext.clusterBuffer.SetData(clusterBuffer, currentCount, currentCount + mcrContext.clusterCount, clusterBuffer.Length - currentCount);
-            mcrContext.verticesBuffer.SetData(vertexBuffer, currentCount * MCRConstant.c_CLUSTER_CLIP_COUNT, (currentCount + mcrContext.clusterCount) * MCRConstant.c_CLUSTER_CLIP_COUNT, (clusterBuffer.Length - currentCount) * MCRConstant.c_CLUSTER_CLIP_COUNT);
+            mcrContext.verticesBuffer.SetData(vertexBuffer, currentCount * MCRConstant.c_CLUSTER_VERTEX_COUNT, (currentCount + mcrContext.clusterCount) * MCRConstant.c_CLUSTER_VERTEX_COUNT, (clusterBuffer.Length - currentCount) * MCRConstant.c_CLUSTER_VERTEX_COUNT);
             int clusterCount = clusterBuffer.Length;
             clusterBuffer.Dispose();
             vertexBuffer.Dispose();

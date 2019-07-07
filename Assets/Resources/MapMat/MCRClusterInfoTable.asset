@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clusterInfoList:
   - name: SampleScene_GPUDRP
-    clusterCount: 2617
+    clusterCount: 3476

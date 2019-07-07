@@ -11,7 +11,8 @@
 #include "UnityCG.cginc"
 #include "Assets/GPUDRP/Shaders/MCRVariables.cginc"
 #include "Assets/GPUDRP/Shaders/MCRFunctions.cginc"
-shared float4 planes[PLANECOUNT];
+
+shared float4 planes[6];
 
 RWStructuredBuffer<uint> instanceCountBuffer;
 Texture2D<half> _HizDepthTex;  
@@ -20,6 +21,7 @@ uint _Count;
 float3 _CameraUpVector;
 float4x4 _NonJitterVP;
 float PlaneTest(MCRCluster info){
+
     float3 position = info.position;
     float3 extent = info.extent;
     [unroll]
@@ -101,10 +103,10 @@ void UnsafeCull(uint id : SV_DISPATCHTHREADID)
 }
 float3 _SceneOffset;
 uint _OffsetIndex;
-[numthreads(1, CLUSTER_CLIP_COUNT, 1)]
+[numthreads(1, CLUSTER_VERTEX_COUNT, 1)]
 void MoveVertex(uint2 id : SV_DISPATCHTHREADID)
 {
-	uint index = (id.x + _OffsetIndex) * CLUSTER_CLIP_COUNT + id.y;
+	uint index = (id.x + _OffsetIndex) * CLUSTER_VERTEX_COUNT + id.y;
 	MCRVertex ver = verticesBuffer[index];
 	float3 pos = DecodeWorldPos(ver);
 	pos += _SceneOffset;
@@ -127,13 +129,12 @@ float4x4 _LastVp;
 [numthreads(64, 1, 1)]
 void FrustumFilter(uint id : SV_DISPATCHTHREADID)
 {
+
     if(id >= _Count) return; 
     MCRCluster currentObject = clusterBuffer[id];
     if(PlaneTest(currentObject) > 0.5)
     {
         uint currentIndex;
-		InterlockedAdd(instanceCountBuffer[1], 1, currentIndex);
-		resultBuffer[currentIndex] = id;
         [branch]
         if(OcclusionTest(currentObject, _LastVp) > 0.5){
             InterlockedAdd(instanceCountBuffer[1], 1, currentIndex);

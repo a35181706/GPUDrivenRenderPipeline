@@ -30,6 +30,7 @@ namespace GPUDrivenRenderPipeline
 
         //其他
         public static readonly int _MainTex = Shader.PropertyToID("_MainTex");
+        
     }
 
 }
