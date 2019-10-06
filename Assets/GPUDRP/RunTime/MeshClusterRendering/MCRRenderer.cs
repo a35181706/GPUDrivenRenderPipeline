@@ -28,7 +28,7 @@ namespace GPUDRP.MeshClusterRendering
         {
             foreach(MCRScene scene in renderList)
             {
-                if(scene.isLoadFinish)
+                if(scene.isActiveAndEnabled && scene.isLoadFinish)
                 {
                     RenderScene(scene);
                 }
@@ -37,26 +37,13 @@ namespace GPUDRP.MeshClusterRendering
 
         private static void RenderScene(MCRScene scene)
         {
-            
-            ComputeBuffer clusterBuffer = ComputeBufferPool.GetTempBuffer(scene.ClusterCount, scene.clusterStride);
-            ComputeBuffer vertexBuffer = ComputeBufferPool.GetTempBuffer(scene.VertexCount, scene.vertexStride);
-            ComputeBuffer indirectBuffer = ComputeBufferPool.GetIndirectBuffer();
+            scene.context.UpdateBuffers(scene);
 
-            indirectArgs[0] = MCRConstant.CLUSTER_VERTEX_COUNT;
-            indirectArgs[1] = (uint)scene.ClusterCount;
+            PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRVertexBuffer, scene.context.vertexBuffer);
+            PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRClusterBuffer, scene.context.clusterBuffer);
 
-            clusterBuffer.SetData<ClusterInfo>(scene.clusterList);
-            vertexBuffer.SetData<VertexInfo>(scene.vertexList);
-            indirectBuffer.SetData<uint>(indirectArgs);
+            PipelineContext.mainCmdBuffer.DrawProceduralIndirect(Matrix4x4.identity, scene.pipelineAsset.UnlitMat, 0, MeshTopology.Triangles, scene.context.inDirectBuffer);
 
-            PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRVertexBuffer, vertexBuffer);
-            PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRClusterBuffer, clusterBuffer);
-
-            PipelineContext.mainCmdBuffer.DrawProceduralIndirect(Matrix4x4.identity, scene.pipelineAsset.UnlitMat, 0, MeshTopology.Triangles, indirectBuffer);
-
-            ComputeBufferPool.ReleaseEndOfRender(ref clusterBuffer);
-            ComputeBufferPool.ReleaseEndOfRender(ref vertexBuffer);
-            ComputeBufferPool.ReleaseEndOfRender(ref indirectBuffer);
         }
     }
 

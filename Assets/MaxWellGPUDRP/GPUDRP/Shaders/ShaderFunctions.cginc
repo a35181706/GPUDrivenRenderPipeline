@@ -1,6 +1,0 @@
-#ifndef SHADER_FUNCTIONS
-#define SHADER_FUNCTIONS
-
-
-
-#endif

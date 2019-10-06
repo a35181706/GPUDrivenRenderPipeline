@@ -67,16 +67,28 @@ namespace GPUDRP.MeshClusterRendering
             //提取cluster
             foreach(MeshFilter mf in allFilters)
             {
-                if(!mf.sharedMesh)
+                if(!mf.sharedMesh || !mf.gameObject.activeInHierarchy)
                 {
                     continue;
                 }
 
-                if(mf.sharedMesh.subMeshCount > 1)
+                MeshRenderer render = mf.GetComponent<MeshRenderer>();
+                if (!render)
                 {
-                    Debug.LogError("不支持多submesh的物体：" + mf.gameObject.name + ",submeshcout:" + mf.sharedMesh.subMeshCount);
                     continue;
                 }
+
+                if(render.sharedMaterials.Length != mf.sharedMesh.subMeshCount)
+                {
+                    Debug.LogError(mf.gameObject.name + "材质数量与submesh不匹配" +  ",submeshcout:" + mf.sharedMesh.subMeshCount + ",材质数量:" + render.sharedMaterials.Length);
+                    continue;
+                }
+
+                //if(mf.sharedMesh.subMeshCount > 1)
+                //{
+                //    Debug.LogError("不支持多submesh的物体：" + mf.gameObject.name + ",submeshcout:" + mf.sharedMesh.subMeshCount);
+                //    continue;
+                //}
 
                 List<Vector3> vertex = new List<Vector3>();
                 List<int> triangles = new List<int>();
@@ -85,71 +97,79 @@ namespace GPUDRP.MeshClusterRendering
                 List<Color> color = new List<Color>();
 
                 mf.sharedMesh.GetVertices(vertex);
-                mf.sharedMesh.GetTriangles(triangles,0);
                 mf.sharedMesh.GetUVs(0, uv);
                 mf.sharedMesh.GetColors(color);
                 mf.sharedMesh.GetNormals(normal);
 
-                //读取三角形顶点信息
-                for (int i = 0;i < triangles.Count;i += 3)
+                //处理submesh
+                for(int k = 0;k < mf.sharedMesh.subMeshCount;k++)
                 {
-                    VertexInfo vertex1 = new VertexInfo();
-                    int index0 = triangles[i];
-                    vertex1.worldPos = mf.transform.localToWorldMatrix.MultiplyPoint(vertex[index0]);
-                    vertex1.worldNormal = mf.transform.localToWorldMatrix.MultiplyVector(normal[index0]);
-                    vertex1.UV0 = uv[index0];
-                    //看看有没有顶点色
-                    if(color.Count > 0)
+                    triangles.Clear();
+                    mf.sharedMesh.GetTriangles(triangles, k);
+
+                    //读取三角形顶点信息
+                    for (int i = 0; i < triangles.Count; i += 3)
                     {
-                        vertex1.Color =new float4( color[index0].r, color[index0].g, color[index0].b, color[index0].a);
-                    }
-                   
-                    currentVertexList.Add(vertex1);
+                        VertexInfo vertex1 = new VertexInfo();
+                        int index0 = triangles[i];
+                        vertex1.worldPos = mf.transform.localToWorldMatrix.MultiplyPoint(vertex[index0]);
+                        vertex1.worldNormal = mf.transform.localToWorldMatrix.MultiplyVector(normal[index0]);
+                        vertex1.UV0 = uv[index0];
+                        //看看有没有顶点色
+                        if (color.Count > 0)
+                        {
+                            vertex1.Color = new float4(color[index0].r, color[index0].g, color[index0].b, color[index0].a);
+                        }
 
-                    VertexInfo vertex2 = new VertexInfo();
-                    int index1 = triangles[i + 1];
-                    vertex2.worldPos = mf.transform.localToWorldMatrix.MultiplyPoint(vertex[index1]);
-                    vertex2.worldNormal = mf.transform.localToWorldMatrix.MultiplyVector(normal[index1]);
-                    vertex2.UV0 = uv[index1];
-                    //看看有没有顶点色
-                    if (color.Count > 0)
-                    {
-                        vertex2.Color = new float4(color[index1].r, color[index1].g, color[index1].b, color[index1].a);
-                    }
-                        
-                    currentVertexList.Add(vertex2);
+                        currentVertexList.Add(vertex1);
 
-                    VertexInfo vertex3 = new VertexInfo();
-                    int index2 = triangles[i + 2];
-                    vertex3.worldPos = mf.transform.localToWorldMatrix.MultiplyPoint(vertex[index2]);
-                    vertex3.worldNormal = mf.transform.localToWorldMatrix.MultiplyVector(normal[index2]);
-                    vertex3.UV0 = uv[index2];
+                        VertexInfo vertex2 = new VertexInfo();
+                        int index1 = triangles[i + 1];
+                        vertex2.worldPos = mf.transform.localToWorldMatrix.MultiplyPoint(vertex[index1]);
+                        vertex2.worldNormal = mf.transform.localToWorldMatrix.MultiplyVector(normal[index1]);
+                        vertex2.UV0 = uv[index1];
+                        //看看有没有顶点色
+                        if (color.Count > 0)
+                        {
+                            vertex2.Color = new float4(color[index1].r, color[index1].g, color[index1].b, color[index1].a);
+                        }
 
-                    //看看有没有顶点色
-                    if (color.Count > 0)
-                    {
-                        vertex3.Color = new float4(color[index2].r, color[index2].g, color[index2].b, color[index2].a);
-                    }
-                       
-                    currentVertexList.Add(vertex3);
+                        currentVertexList.Add(vertex2);
 
-                    //完成了一个Cluster所需要的顶点数
-                    if(currentVertexList.Count == MCRConstant.CLUSTER_VERTEX_COUNT)
-                    {
-                        ClusterInfo clusterInfo = new ClusterInfo();
-                        clusterInfo.vertexStartIndex = currentVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT;
+                        VertexInfo vertex3 = new VertexInfo();
+                        int index2 = triangles[i + 2];
+                        vertex3.worldPos = mf.transform.localToWorldMatrix.MultiplyPoint(vertex[index2]);
+                        vertex3.worldNormal = mf.transform.localToWorldMatrix.MultiplyVector(normal[index2]);
+                        vertex3.UV0 = uv[index2];
 
-                        //计算bounds
+                        //看看有没有顶点色
+                        if (color.Count > 0)
+                        {
+                            vertex3.Color = new float4(color[index2].r, color[index2].g, color[index2].b, color[index2].a);
+                        }
 
-                        currentClusterList.Add(clusterInfo);
+                        currentVertexList.Add(vertex3);
+
+                        //完成了一个Cluster所需要的顶点数
+                        if ((currentVertexList.Count % MCRConstant.CLUSTER_VERTEX_COUNT) == 0 && currentVertexList.Count > 0)
+                        {
+                            ClusterInfo clusterInfo = new ClusterInfo();
+                            clusterInfo.vertexStartIndex = currentVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT;
+
+                            //计算bounds
+
+                            currentClusterList.Add(clusterInfo);
+                        }
                     }
                 }
+
             }
 
-            //玩了之后看看顶点数是否刚好够，不够的话，补上去
-            if(currentVertexList.Count > 0)
+            int packCout = currentVertexList.Count - (MCRConstant.CLUSTER_VERTEX_COUNT * currentClusterList.Count);
+            //完了之后看看顶点数是否刚好够，不够的话，补上去
+            if (packCout > 0)
             {
-                int dt = MCRConstant.CLUSTER_VERTEX_COUNT - currentVertexList.Count;
+                int dt = MCRConstant.CLUSTER_VERTEX_COUNT - packCout;
                 for(int i = 0;i < dt;i++)
                 {
                     VertexInfo info = currentVertexList[currentVertexList.Count - 1];

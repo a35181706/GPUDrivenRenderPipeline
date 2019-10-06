@@ -59,14 +59,11 @@ namespace GPUDRP.MeshClusterRendering
             get
             {
                 return data3;
-                //return new Vector4(data3.x, data3.y, data3.z,data3.w);
+
             }
             set
             {
-                data3.x = value.x;
-                data3.y = value.y;
-                data3.z = value.z;
-                data3.w = value.w;
+                data3 = value;
             }
         }
 

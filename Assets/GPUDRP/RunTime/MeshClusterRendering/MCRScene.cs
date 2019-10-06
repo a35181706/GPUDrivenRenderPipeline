@@ -22,6 +22,8 @@ namespace GPUDRP.MeshClusterRendering
         [System.NonSerialized]
         public int vertexStride = Marshal.SizeOf<VertexInfo>();
 
+        public MCRSceneContext context { get; private set; }
+
         public bool isLoadFinish
         {
             get; set;
@@ -45,15 +47,21 @@ namespace GPUDRP.MeshClusterRendering
             {
                 MCRResourcesSystem.LoadMCRBakeAsset(this);
                 MCRRenderer.AddToRenderList(this);
+                context = new MCRSceneContext();
+                context.Init(this);
             }
 
         }
+
+
 
         public void OnDestroy()
         {
             if (ClusterCount > 0 && VertexCount > 0)
             {
                 MCRRenderer.RemoveFromRenderList(this);
+                context.Destroy();
+                context = null;
             }
                 
             clusterList.Dispose();
