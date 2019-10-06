@@ -2,70 +2,79 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Unity.Mathematics;
 
 namespace GPUDRP.MeshClusterRendering
 {
-    public class VertexInfo
+    public unsafe struct VertexInfo
     {
         /// <summary>
         /// XYZ:WorldPos
         /// W:uv0.x
         /// </summary>
-        private Vector4 data1;
+        private float4 data1;
 
         /// <summary>
         /// XYZ:WorldNormal
         /// W:uv0.y
         /// </summary>
-        private Vector4 data2;
+        private float4 data2;
 
         /// <summary>
         /// XYZW:Color
         /// </summary>
-        private Vector4 data3;
+        private float4 data3;
 
 
-        public Vector3 worldPos
+        public float3 worldPos
         {
             get
             {
-                return data1;
+                return new float3(data1.x,data1.y,data1.z);
             }
             set
             {
-                data1 = value;
+                data1.x = value.x;
+                data1.y = value.y;
+                data1.z = value.z;
             }
         }
 
-        public Vector3 worldNormal
+        public float3 worldNormal
         {
             get
             {
-                return data2;
+                return new float3(data2.x, data2.y, data2.z);
             }
             set
             {
-                data2 = value;
+                data2.x = value.x;
+                data2.y = value.y;
+                data2.z = value.z;
             }
         }
 
-        public Vector4 Color
+        public float4 Color
         {
             get
             {
                 return data3;
+                //return new Vector4(data3.x, data3.y, data3.z,data3.w);
             }
             set
             {
-                data3 = value;
+                data3.x = value.x;
+                data3.y = value.y;
+                data3.z = value.z;
+                data3.w = value.w;
             }
         }
 
-        public Vector2 UV0
+        public float2 UV0
         {
             get
             {
-                return new Vector2(data1.w, data2.w);
+                return new float2(data1.w, data2.w);
             }
             set
             {

@@ -9,46 +9,36 @@
         LOD 100
         Pass
         {
-			Name "Unilt"
 			Tags { "RenderType" = "Opaque" "LightMode" = "GPUDRPUnilt" }
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-
+			#pragma target 5.0
             #include "UnityCG.cginc"
+			#include "Assets/GPUDRP/Shader/MeshClusterRendering/MCRFunctions.cginc"
+		  
+			struct v2f
+			{
+				float4 vertex : SV_POSITION;
+				float4 normal : NORMAL;
+				float4 uv0    : TexCoord0;
+			};
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
-                float4 vertex : SV_POSITION;
-            };
-
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-
-            v2f vert (appdata v)
+			v2f vert(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				VertexInfo vertex = getVertex(vertexID, instanceID);
+				o.vertex = mul(UNITY_MATRIX_VP, DecodeWorldPos(vertex));
+				o.normal = float4(DecodeWorldNormal(vertex), 1);
+                o.uv0 = float4(DecodeUV0(vertex), 0, 1);
 
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
 
-                return col;
+                return i.uv0;
             }
             ENDCG
         }

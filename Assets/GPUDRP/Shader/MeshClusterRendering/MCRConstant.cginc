@@ -1,0 +1,6 @@
+﻿#ifndef MCR_CONSTANT
+#define MCR_CONSTANT
+
+#define CLUSTER_TRANGLES_COUNT 64
+#define CLUSTER_VERTEX_COUNT 192 //64*3
+#endif

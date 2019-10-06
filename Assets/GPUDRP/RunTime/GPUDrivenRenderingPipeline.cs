@@ -4,46 +4,76 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace GPUDRP
 {
+    using MeshClusterRendering;
+
     public class GPUDrivenRenderingPipeline : UnityEngine.Rendering.RenderPipeline
     {
+        private Dictionary<Camera, GPUDRPCamera> allGPUDRPCamera = new Dictionary<Camera, GPUDRPCamera>();
+
+        private bool bFirstCall = false;
+
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
-            
-            foreach(Camera cam in cameras)
+            if(!bFirstCall)
             {
-
-                ScriptableCullingParameters cullParams;
-
-                //使用unity的视椎体裁剪
-                if (!cam.TryGetCullingParameters(out cullParams))
+                if(Application.isPlaying)
                 {
-                    return;
+                    MCRResourcesSystem.Init();
+                    GlobalMaterial.Init();
                 }
 
-
-                context.SetupCameraProperties(cam);
-
-                var drawSettings = new DrawingSettings();
-
-                drawSettings.SetShaderPassName(0, ShaderPass.c_UniltPass_ID);
-                drawSettings.sortingSettings = new SortingSettings(cam) { criteria = SortingCriteria.CommonOpaque };
-                drawSettings.perObjectData = PerObjectData.None;
-                var filterSettings = new FilteringSettings
-                {
-                    layerMask = cam.cullingMask,
-                    renderingLayerMask = 1,
-                    renderQueueRange = RenderQueueRange.opaque
-                };
-
-                CullingResults cullingResults = context.Cull(ref cullParams);
-
-                //绘制原来的物体
-                context.DrawRenderers(cullingResults, ref drawSettings, ref filterSettings);
-
-                context.DrawSkybox(cam);
-                context.Submit();
+                bFirstCall = true;
             }
 
+            foreach(Camera cam in cameras)
+            {
+                GPUDRPCamera gpudrpCamera = null;
+
+                if (!allGPUDRPCamera.TryGetValue(cam, out gpudrpCamera))
+                {
+                    gpudrpCamera = cam.GetComponent<GPUDRPCamera>();
+
+                    if (!gpudrpCamera)
+                    {
+                        gpudrpCamera = cam.gameObject.AddComponent<GPUDRPCamera>();
+                        allGPUDRPCamera.Add(cam, gpudrpCamera);
+                    }
+                }
+
+                //设置pipelinecontext
+                PipelineContext.mainCmdBuffer = CommandBufferPool.Get("MainCommandBuffer");
+                PipelineContext.renderContext = context;
+                PipelineContext.gpuCamera = gpudrpCamera;
+
+                if(PipelineContext.gpuCamera.BeginRender())
+                {
+                    PipelineContext.gpuCamera.Render();
+                }
+
+                context.Submit();
+
+                PipelineContext.gpuCamera.EndRender();
+
+                ComputeBufferPool.EndOfRender();
+                CommandBufferPool.Release(PipelineContext.mainCmdBuffer);
+            }
+
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            foreach (var cam in allGPUDRPCamera.Values)
+            {
+                cam.Clear();
+            }
+
+            allGPUDRPCamera.Clear();
+
+            MCRResourcesSystem.Destroy();
+            ComputeBufferPool.Destroy();
+            CommandBufferPool.Destroy();
+            GlobalMaterial.Destroy();
         }
     }
 

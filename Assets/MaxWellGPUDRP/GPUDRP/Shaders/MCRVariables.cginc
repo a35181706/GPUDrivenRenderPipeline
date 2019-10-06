@@ -8,7 +8,7 @@
 #define CLUSTER_TRI_COUNT 64
 
 //一个cluster有多少个顶点
-#define CLUSTER_VERTEX_COUNT CLUSTER_TRI_COUNT * 3
+#define CLUSTER_VERTEX_COUNT 192
 
 
 #ifdef COMPUTESHADER

@@ -4,19 +4,23 @@ using UnityEngine;
 
 namespace GPUDRP.MeshClusterRendering
 {
-    public class MCRConstant : MonoBehaviour
+    public class MCRConstant 
     {
-        // Start is called before the first frame update
-        void Start()
-        {
 
-        }
+        /// <summary>
+        /// 一个cluster有多少个三角形
+        /// </summary>
+        public const int CLUSTER_TRANGLES_COUNT = 64;
 
-        // Update is called once per frame
-        void Update()
-        {
+        /// <summary>
+        /// 一个cluster有多少个顶点数据
+        /// </summary>
+        public const int CLUSTER_VERTEX_COUNT = CLUSTER_TRANGLES_COUNT * 3;
 
-        }
+        public static readonly int _MCRVertexBuffer = Shader.PropertyToID("_MCRVertexBuffer");
+
+        public static readonly int _MCRClusterBuffer = Shader.PropertyToID("_MCRClusterBuffer");
+
     }
 
 }

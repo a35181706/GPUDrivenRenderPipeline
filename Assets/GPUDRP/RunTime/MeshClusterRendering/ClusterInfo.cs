@@ -1,22 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GPUDRP.MeshClusterRendering
 {
-    public class ClusterInfo : MonoBehaviour
+    [System.Serializable]
+    public unsafe struct ClusterInfo
     {
-        // Start is called before the first frame update
-        void Start()
-        {
+        public float4 center;
+        public float4 size;
 
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+        public int vertexStartIndex;
     }
 
 }

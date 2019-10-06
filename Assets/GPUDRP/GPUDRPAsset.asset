@@ -12,3 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50b80206866aaa64f9265b366da1fca5, type: 3}
   m_Name: GPUDRPAsset
   m_EditorClassIdentifier: 
+  mcrAssets:
+    CullingShader: {fileID: 0}
+    UnlitShader: {fileID: 4800000, guid: de0a9217a304f494bae61ee50f75c824, type: 3}
+  DynamicResScale: 1
