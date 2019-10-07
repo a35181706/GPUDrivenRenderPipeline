@@ -11,11 +11,6 @@ namespace GPUDRP.MeshClusterRendering
     public class MCRBaker :EditorWindow
     {
         /// <summary>
-        /// MCR 资源你的保存路径
-        /// </summary>
-        const string BakeAssetSavePath = "Assets/GPUDRP/Resources";
-
-        /// <summary>
         /// 在这个根节点下的，才会生成MCR
         /// </summary>
         const string MCRParentRoot = "MCRRoot";
@@ -59,7 +54,7 @@ namespace GPUDRP.MeshClusterRendering
             }
 
             string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            string fullSavedAssetsPath = BakeAssetSavePath + "/" + currentSceneName + "_MCRBakeAsset" + ".mcr";
+            string fullSavedAssetsPath = MCRConstant.BakeAssetSavePath + "/" + currentSceneName + "_MCRBakeAsset" + ".mcr";
 
             List<ClusterInfo> currentClusterList = new List<ClusterInfo>();
             List<VertexInfo> currentVertexList = new List<VertexInfo>();
@@ -185,9 +180,9 @@ namespace GPUDRP.MeshClusterRendering
 
             //保存cluster
             SaveClustetInfo(currentClusterList, currentVertexList,fullSavedAssetsPath);
-            mcrScene.ClusterInfoAssetsPath = fullSavedAssetsPath;
-            mcrScene.ClusterCount = currentClusterList.Count;
-            mcrScene.VertexCount = currentVertexList.Count; 
+            mcrScene.context.ClusterInfoAssetsPath = fullSavedAssetsPath.Replace(MCRConstant.BakeAssetSavePath + "/",string.Empty);
+            mcrScene.context.ClusterCount = currentClusterList.Count;
+            mcrScene.context.VertexCount = currentVertexList.Count; 
         }
 
 
@@ -216,7 +211,7 @@ namespace GPUDRP.MeshClusterRendering
                 allBytes.AddRange(IOUtils.StructToByte<VertexInfo>(vertex));
             }
 
-            File.WriteAllBytes(fullSavedAssetsPath, allBytes.ToArray());
+            IOUtils.WriteAllBytes(fullSavedAssetsPath, allBytes.ToArray());
         }
     }
 

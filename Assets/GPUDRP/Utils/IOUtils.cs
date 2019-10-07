@@ -15,6 +15,17 @@ public static class IOUtils
         }
     }
 
+    public static void WriteAllBytes(string path,Byte[] bytes)
+    {
+        string folder = Path.GetDirectoryName(path);
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        File.WriteAllBytes(path, bytes);
+    }
+
     /// <summary>
     /// 将字节数组转换为结构体
     /// </summary>

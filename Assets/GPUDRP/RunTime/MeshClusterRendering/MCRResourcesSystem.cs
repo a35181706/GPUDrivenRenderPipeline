@@ -13,7 +13,7 @@ namespace GPUDRP.MeshClusterRendering
 
         private readonly static System.Object lockObj = new System.Object();
 
-        private static Queue<MCRScene> bakeAssetsQueue = new Queue<MCRScene>();
+        private static Queue<MCRSceneContext> bakeAssetsQueue = new Queue<MCRSceneContext>();
 
         public static void Init()
         {
@@ -43,22 +43,23 @@ namespace GPUDRP.MeshClusterRendering
 
         private static void ProcessBakeAssetLoadingQueue()
         {
-            MCRScene mcrScene = null;
+            MCRSceneContext mcrScenecontext = null;
 
             lock (lockObj)
             {
                 if(bakeAssetsQueue.Count > 0)
                 {
-                    mcrScene = bakeAssetsQueue.Dequeue();
+                    mcrScenecontext = bakeAssetsQueue.Dequeue();
                 }
                
             }
 
-            if (!mcrScene)
+            if (mcrScenecontext.bDestroyed)
             {
                 return;
             }
-            System.IO.BinaryReader reader = new System.IO.BinaryReader(System.IO.File.OpenRead(mcrScene.ClusterInfoAssetsPath));
+            
+            System.IO.BinaryReader reader = new System.IO.BinaryReader(System.IO.File.OpenRead(mcrScenecontext.ClusterInfoAssetsPath));
 
             int clusterCount = reader.ReadInt32();
             int vertexCount = reader.ReadInt32();
@@ -69,7 +70,12 @@ namespace GPUDRP.MeshClusterRendering
                 byte[] bytes = reader.ReadBytes(Marshal.SizeOf<ClusterInfo>());
                 ClusterInfo clusterinfo = IOUtils.ByteToStruct<ClusterInfo>(bytes);
 
-                mcrScene.clusterList[i] = clusterinfo;
+                if (mcrScenecontext.bDestroyed)
+                {
+                    reader.Close();
+                    return;
+                }
+                mcrScenecontext.clusterList[i] = clusterinfo;
             }
 
             //读取顶点
@@ -78,10 +84,22 @@ namespace GPUDRP.MeshClusterRendering
                 byte[] bytes = reader.ReadBytes(Marshal.SizeOf<VertexInfo>());
                 VertexInfo vertexinfo = IOUtils.ByteToStruct<VertexInfo>(bytes);
 
-                mcrScene.vertexList[i] = vertexinfo;
+                if (mcrScenecontext.bDestroyed)
+                {
+                    reader.Close();
+                    return;
+                }
+
+                mcrScenecontext.vertexList[i] = vertexinfo;
             }
 
-            mcrScene.isLoadFinish = true;
+            if (mcrScenecontext.bDestroyed)
+            {
+                reader.Close();
+                return;
+            }
+
+            mcrScenecontext.bLoadFinish = true;
 
             reader.Close();
         }
@@ -108,9 +126,9 @@ namespace GPUDRP.MeshClusterRendering
 
         #region API
         
-        public static void LoadMCRBakeAsset(MCRScene scene)
+        public static void LoadMCRBakeAsset(MCRSceneContext scene)
         {
-            if(!scene)
+            if(null == scene)
             {
                 return;
             }
@@ -122,9 +140,9 @@ namespace GPUDRP.MeshClusterRendering
             }
         }
 
-        public static void UnLoadMCRBakeAssets(MCRScene scene)
+        public static void UnLoadMCRBakeAssets(MCRSceneContext scene)
         {
-            if (!scene)
+            if (null == scene)
             {
                 return;
             }

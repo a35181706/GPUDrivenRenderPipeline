@@ -21,6 +21,11 @@ namespace GPUDRP.MeshClusterRendering
 
         public static readonly int _MCRClusterBuffer = Shader.PropertyToID("_MCRClusterBuffer");
 
+        /// <summary>
+        /// MCR 资源你的保存路径
+        /// </summary>
+        public static readonly string BakeAssetSavePath = Application.streamingAssetsPath + "/MCRBakeAsset";
+
     }
 
 }

@@ -28,7 +28,7 @@ namespace GPUDRP.MeshClusterRendering
         {
             foreach(MCRScene scene in renderList)
             {
-                if(scene.isActiveAndEnabled && scene.isLoadFinish)
+                if(scene.isActiveAndEnabled && scene.context.bLoadFinish)
                 {
                     RenderScene(scene);
                 }
@@ -37,7 +37,7 @@ namespace GPUDRP.MeshClusterRendering
 
         private static void RenderScene(MCRScene scene)
         {
-            scene.context.UpdateBuffers(scene);
+            scene.context.UpdateBuffers();
 
             PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRVertexBuffer, scene.context.vertexBuffer);
             PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRClusterBuffer, scene.context.clusterBuffer);

@@ -164,9 +164,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ad8298effd444643ac898ec4adc960c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ClusterInfoAssetsPath: Assets/GPUDRP/Resources/SampleScene_MCRBakeAsset.mcr
-  ClusterCount: 4033
-  VertexCount: 774336
+  context:
+    ClusterInfoAssetsPath: SampleScene_MCRBakeAsset.mcr
+    ClusterCount: 4033
+    VertexCount: 774336
 --- !u!1001 &474129499
 PrefabInstance:
   m_ObjectHideFlags: 0
