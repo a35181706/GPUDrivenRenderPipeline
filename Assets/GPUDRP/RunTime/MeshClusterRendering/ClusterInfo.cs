@@ -8,7 +8,7 @@ namespace GPUDRP.MeshClusterRendering
     public unsafe struct ClusterInfo
     {
         public float4 center;
-        public float4 size;
+        public float4 extent;
 
         public int vertexStartIndex;
     }

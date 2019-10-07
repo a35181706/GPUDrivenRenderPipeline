@@ -56,8 +56,8 @@ namespace GPUDRP.MeshClusterRendering
             string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             string fullSavedAssetsPath = MCRConstant.BakeAssetSavePath + "/" + currentSceneName + "_MCRBakeAsset" + ".mcr";
 
-            List<ClusterInfo> currentClusterList = new List<ClusterInfo>();
-            List<VertexInfo> currentVertexList = new List<VertexInfo>();
+            List<ClusterInfo> allClusterList = new List<ClusterInfo>();
+            List<VertexInfo> allVertexList = new List<VertexInfo>();
 
             //提取cluster
             foreach(MeshFilter mf in allFilters)
@@ -116,7 +116,7 @@ namespace GPUDRP.MeshClusterRendering
                             vertex1.Color = new float4(color[index0].r, color[index0].g, color[index0].b, color[index0].a);
                         }
 
-                        currentVertexList.Add(vertex1);
+                        allVertexList.Add(vertex1);
 
                         VertexInfo vertex2 = new VertexInfo();
                         int index1 = triangles[i + 1];
@@ -129,7 +129,7 @@ namespace GPUDRP.MeshClusterRendering
                             vertex2.Color = new float4(color[index1].r, color[index1].g, color[index1].b, color[index1].a);
                         }
 
-                        currentVertexList.Add(vertex2);
+                        allVertexList.Add(vertex2);
 
                         VertexInfo vertex3 = new VertexInfo();
                         int index2 = triangles[i + 2];
@@ -143,53 +143,94 @@ namespace GPUDRP.MeshClusterRendering
                             vertex3.Color = new float4(color[index2].r, color[index2].g, color[index2].b, color[index2].a);
                         }
 
-                        currentVertexList.Add(vertex3);
+                        allVertexList.Add(vertex3);
 
                         //完成了一个Cluster所需要的顶点数
-                        if ((currentVertexList.Count % MCRConstant.CLUSTER_VERTEX_COUNT) == 0 && currentVertexList.Count > 0)
+                        if ((allVertexList.Count % MCRConstant.CLUSTER_VERTEX_COUNT) == 0 && allVertexList.Count > 0)
                         {
-                            ClusterInfo clusterInfo = new ClusterInfo();
-                            clusterInfo.vertexStartIndex = currentVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT;
-
-                            //计算bounds
-
-                            currentClusterList.Add(clusterInfo);
+                            allClusterList.Add(BuildCluster(allVertexList));
                         }
                     }
                 }
 
             }
 
-            int packCout = currentVertexList.Count - (MCRConstant.CLUSTER_VERTEX_COUNT * currentClusterList.Count);
+            int packCout = allVertexList.Count - (MCRConstant.CLUSTER_VERTEX_COUNT * allClusterList.Count);
             //完了之后看看顶点数是否刚好够，不够的话，补上去
             if (packCout > 0)
             {
                 int dt = MCRConstant.CLUSTER_VERTEX_COUNT - packCout;
                 for(int i = 0;i < dt;i++)
                 {
-                    VertexInfo info = currentVertexList[currentVertexList.Count - 1];
-                    currentVertexList.Add(info);
+                    VertexInfo info = allVertexList[allVertexList.Count - 1];
+                    allVertexList.Add(info);
                 }
-                ClusterInfo clusterInfo = new ClusterInfo();
-                clusterInfo.vertexStartIndex = currentVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT;
 
-                //计算bounds
-
-                currentClusterList.Add(clusterInfo);
+                allClusterList.Add(BuildCluster(allVertexList));
             }
 
             //保存cluster
-            SaveClustetInfo(currentClusterList, currentVertexList,fullSavedAssetsPath);
+            SaveClustetInfo(allClusterList, allVertexList,fullSavedAssetsPath);
             mcrScene.context.ClusterInfoAssetsPath = fullSavedAssetsPath.Replace(MCRConstant.BakeAssetSavePath + "/",string.Empty);
-            mcrScene.context.ClusterCount = currentClusterList.Count;
-            mcrScene.context.VertexCount = currentVertexList.Count; 
+            mcrScene.context.ClusterCount = allClusterList.Count;
+            mcrScene.context.VertexCount = allVertexList.Count; 
         }
 
+
+        public ClusterInfo BuildCluster(List<VertexInfo> allVertexList)
+        {
+            ClusterInfo clusterInfo = new ClusterInfo();
+            clusterInfo.vertexStartIndex = allVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT;
+
+            //计算bounds,找出最大的点和最小的点
+            float4 minPoint = float.MaxValue;
+            minPoint.w = 0;
+            float4 maxPoint = float.MinValue;
+            maxPoint.w = 0;
+            for (int index = clusterInfo.vertexStartIndex; index < allVertexList.Count; index++)
+            {
+                VertexInfo vertexInfo = allVertexList[index];
+
+                //x
+                if (vertexInfo.worldPos.x < minPoint.x)
+                {
+                    minPoint.x = vertexInfo.worldPos.x;
+                }
+                else if (vertexInfo.worldPos.x > maxPoint.x)
+                {
+                    maxPoint.x = vertexInfo.worldPos.x;
+                }
+
+                //y
+                if (vertexInfo.worldPos.y < minPoint.y)
+                {
+                    minPoint.y = vertexInfo.worldPos.y;
+                }
+                else if (vertexInfo.worldPos.y > maxPoint.y)
+                {
+                    maxPoint.y = vertexInfo.worldPos.y;
+                }
+
+                //z
+                if (vertexInfo.worldPos.z < minPoint.z)
+                {
+                    minPoint.z = vertexInfo.worldPos.z;
+                }
+                else if (vertexInfo.worldPos.z > maxPoint.z)
+                {
+                    maxPoint.z = vertexInfo.worldPos.z;
+                }
+            }
+
+            clusterInfo.center = (minPoint + maxPoint) / 2;
+            clusterInfo.extent = (maxPoint - minPoint) / 2;
+
+            return clusterInfo;
+        }
 
         public void SaveClustetInfo(List<ClusterInfo> clusterlist,List<VertexInfo> vertexList,string fullSavedAssetsPath)
         {
             
-
             IOUtils.DeleteFile(fullSavedAssetsPath);
             List<byte> allBytes = new List<byte>();
 
