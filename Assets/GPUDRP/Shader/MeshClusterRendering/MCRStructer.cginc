@@ -5,7 +5,7 @@ struct ClusterInfo
 {
 	float4 center;
 	float4 extent;
-	int vertexStartIndex;
+	int clusterIndex;
 };
 
 struct VertexInfo

@@ -41,6 +41,8 @@ namespace GPUDRP
             }
         }
 
+        public Vector4[] frustumPlane { get; private set; }
+
         /// <summary>
         /// 缓冲
         /// </summary>
@@ -54,6 +56,11 @@ namespace GPUDRP
             if(!hostCamera)
             {
                 hostCamera = GetComponent<Camera>();
+            }
+
+            if(null == frustumPlane)
+            {
+                frustumPlane = new Vector4[6];
             }
 
             //使用unity的视椎体裁剪
@@ -85,6 +92,13 @@ namespace GPUDRP
         {
             RTBuffers.ResizeBufferIfNeed(this);
 
+            for(int i = 0;i < 6;i++)
+            {
+                Plane p = cullParams.GetCullingPlane(i);
+
+                frustumPlane[i] = -p.normal;
+                frustumPlane[i].w = p.distance;
+            }
             PipelineContext.mainCmdBuffer.SetRenderTarget(RTBuffers.frameBuffer, RTBuffers.depthBuffer);
             PipelineContext.mainCmdBuffer.ClearRenderTarget(true, true, hostCamera.backgroundColor);
 

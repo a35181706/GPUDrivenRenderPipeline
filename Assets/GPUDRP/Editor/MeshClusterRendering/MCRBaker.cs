@@ -180,14 +180,14 @@ namespace GPUDRP.MeshClusterRendering
         public ClusterInfo BuildCluster(List<VertexInfo> allVertexList)
         {
             ClusterInfo clusterInfo = new ClusterInfo();
-            clusterInfo.vertexStartIndex = allVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT;
+            clusterInfo.clusterindex = (allVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT) / MCRConstant.CLUSTER_VERTEX_COUNT;
 
             //计算bounds,找出最大的点和最小的点
             float4 minPoint = float.MaxValue;
             minPoint.w = 0;
             float4 maxPoint = float.MinValue;
             maxPoint.w = 0;
-            for (int index = clusterInfo.vertexStartIndex; index < allVertexList.Count; index++)
+            for (int index = clusterInfo.clusterindex * MCRConstant.CLUSTER_VERTEX_COUNT; index < allVertexList.Count; index++)
             {
                 VertexInfo vertexInfo = allVertexList[index];
 

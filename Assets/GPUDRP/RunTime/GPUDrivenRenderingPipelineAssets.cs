@@ -20,6 +20,8 @@ namespace GPUDRP
         }
 #endif
 
+
+        public GPUCull.GPUCullPipelineAssets gpuCullAssets;
         public GPUDRP.MeshClusterRendering.MCRPipelineAssets mcrAssets;
         public float DynamicResScale = 1;
 

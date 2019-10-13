@@ -10,7 +10,6 @@ namespace GPUDRP.MeshClusterRendering
     [System.Serializable]
     public class MCRPipelineAssets 
     {
-        public ComputeShader CullingShader;
         public Shader UnlitShader;
 
         public Material UnlitMat { get; private set; }

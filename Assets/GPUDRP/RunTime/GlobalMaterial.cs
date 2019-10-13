@@ -10,11 +10,13 @@ namespace GPUDRP
         public static void Init()
         {
             GPUDrivenRenderingPipelineAssets.Instance.mcrAssets.InitGlobalMaterial();
+            GPUDrivenRenderingPipelineAssets.Instance.gpuCullAssets.InitGlobalMaterial();
         }
 
         public static void Destroy()
         {
             GPUDrivenRenderingPipelineAssets.Instance.mcrAssets.DestroyGlobalMaterial();
+            GPUDrivenRenderingPipelineAssets.Instance.gpuCullAssets.DestroyGlobalMaterial();
         }
     }
 
