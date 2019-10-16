@@ -99,6 +99,7 @@ namespace GPUDRP
                 frustumPlane[i] = -p.normal;
                 frustumPlane[i].w = p.distance;
             }
+
             PipelineContext.mainCmdBuffer.SetRenderTarget(RTBuffers.frameBuffer, RTBuffers.depthBuffer);
             PipelineContext.mainCmdBuffer.ClearRenderTarget(true, true, hostCamera.backgroundColor);
 

@@ -8,7 +8,7 @@ namespace GPUDRP.MeshClusterRendering
     public unsafe struct ClusterInfo
     {
         public float4 center;
-        public float4 extent;
+        public float3 extent;
 
         /// <summary>
         /// 这里存cluster的索引，而不存顶点的起始位置，是因为起始位置可能会出现更大的数字，比如超过65536，就需要更大的精度了

@@ -20,6 +20,7 @@ namespace GPUDRP
                 {
                     MCRResourcesSystem.Init();
                     GlobalMaterial.Init();
+                    GPUCull.GPUCullSystem.Init();
                 }
 
                 bFirstCall = true;
@@ -70,6 +71,7 @@ namespace GPUDRP
 
             allGPUDRPCamera.Clear();
 
+            GPUCull.GPUCullSystem.Destroy();
             MCRResourcesSystem.Destroy();
             ComputeBufferPool.Destroy();
             CommandBufferPool.Destroy();

@@ -3,8 +3,13 @@
 
 struct ClusterInfo
 {
+	/// <summary>
+	/// XYZ:WorldPos
+	/// W:unused
+	/// </summary>
 	float4 center;
-	float4 extent;
+
+	float3 extent;
 	int clusterIndex;
 };
 

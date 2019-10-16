@@ -3,14 +3,16 @@
 #pragma kernel OcclusCull
 #pragma kernel Clear
 
+#include "Assets/GPUDRP/Shader/GPUCull/GPUCullVariables.cginc"
+
 float FrustmTest(ClusterInfo info) {
 
-	float3 position = info.position;
-	float3 extent = info.extent;
+	float3 position = info.center.xyz;
+	float3 extent = info.extent.xyz;
 	[unroll]
 	for (uint i = 0; i < 6; ++i)
 	{
-		float4 plane = planes[i];
+		float4 plane = _FrustumPlanes[i];
 		float3 absNormal = abs(plane.xyz);
 		if ((dot(position, plane.xyz) - dot(absNormal, extent)) > -plane.w)
 		{
@@ -35,5 +37,5 @@ void OcclusCull(uint3 id : SV_DispatchThreadID)
 [numthreads(1, 1, 1)]
 void Clear(uint3 id : SV_DispatchThreadID)
 {
-
+	_MCRCullResultBuffer[0] = 0;
 }

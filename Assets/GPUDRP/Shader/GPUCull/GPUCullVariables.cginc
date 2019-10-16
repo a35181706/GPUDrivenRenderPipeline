@@ -1,6 +1,4 @@
 ﻿#ifndef MCR_COMPUTESHADER_VARIABLES
-// Upgrade NOTE: excluded shader from DX11 because it uses wrong array syntax (type[size] name)
-#pragma exclude_renderers d3d11
 #define MCR_COMPUTESHADER_VARIABLES
 #include "Assets/GPUDRP/Shader/MeshClusterRendering/MCRStructer.cginc"
 
@@ -11,6 +9,8 @@ StructuredBuffer<ClusterInfo> _MCRClusterBuffer;
 RWStructuredBuffer<uint> _MCRCullResultBuffer;
 
 //视椎体的六个面
-float4[6] _FrustumPlanes;
+float4 _FrustumPlanes[6];
 
+//GPU裁剪信息，x-cluster数目，yzw-尚未启用
+float4 _GPUCullInfo;
 #endif

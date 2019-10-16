@@ -16,11 +16,10 @@ namespace GPUDRP.MeshClusterRendering
         /// 一个cluster有多少个顶点数据
         /// </summary>
         public const int CLUSTER_VERTEX_COUNT = CLUSTER_TRANGLES_COUNT * 3;
-
         public static readonly int _MCRVertexBuffer = Shader.PropertyToID("_MCRVertexBuffer");
-
         public static readonly int _MCRClusterBuffer = Shader.PropertyToID("_MCRClusterBuffer");
-
+        public static readonly int _MCRCullResultBuffer = Shader.PropertyToID("_MCRCullResultBuffer");
+        
         /// <summary>
         /// MCR 资源你的保存路径
         /// </summary>

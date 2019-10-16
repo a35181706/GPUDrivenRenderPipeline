@@ -183,10 +183,8 @@ namespace GPUDRP.MeshClusterRendering
             clusterInfo.clusterindex = (allVertexList.Count - MCRConstant.CLUSTER_VERTEX_COUNT) / MCRConstant.CLUSTER_VERTEX_COUNT;
 
             //计算bounds,找出最大的点和最小的点
-            float4 minPoint = float.MaxValue;
-            minPoint.w = 0;
-            float4 maxPoint = float.MinValue;
-            maxPoint.w = 0;
+            float3 minPoint = float.MaxValue;
+            float3 maxPoint = float.MinValue;
             for (int index = clusterInfo.clusterindex * MCRConstant.CLUSTER_VERTEX_COUNT; index < allVertexList.Count; index++)
             {
                 VertexInfo vertexInfo = allVertexList[index];
@@ -222,7 +220,7 @@ namespace GPUDRP.MeshClusterRendering
                 }
             }
 
-            clusterInfo.center = (minPoint + maxPoint) / 2;
+            clusterInfo.center = new float4((minPoint + maxPoint) / 2,0);
             clusterInfo.extent = (maxPoint - minPoint) / 2;
 
             return clusterInfo;

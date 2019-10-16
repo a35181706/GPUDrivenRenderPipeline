@@ -8,6 +8,7 @@ namespace GPUDRP.MeshClusterRendering
     {
         private static List<MCRScene> renderList = new List<MCRScene>();
         private static List<uint> indirectArgs = new List<uint> { 0,0, 0, 0, 0 };
+
         public static void AddToRenderList(MCRScene scene)
         {
             if(renderList.Contains(scene))
@@ -37,13 +38,12 @@ namespace GPUDRP.MeshClusterRendering
 
         private static void RenderScene(MCRScene scene)
         {
-            scene.context.UpdateBuffers();
-
-            PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRVertexBuffer, scene.context.vertexBuffer);
-            PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRClusterBuffer, scene.context.clusterBuffer);
-
-            PipelineContext.mainCmdBuffer.DrawProceduralIndirect(Matrix4x4.identity, scene.pipelineAsset.UnlitMat, 0, MeshTopology.Triangles, scene.context.inDirectBuffer);
-
+            if(scene)
+            {
+                scene.BeforeRender();
+                scene.Render();
+                scene.EndRender();
+            }
         }
     }
 

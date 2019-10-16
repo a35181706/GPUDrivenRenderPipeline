@@ -43,7 +43,10 @@ namespace GPUDRP.MeshClusterRendering
         public List<uint> indirectArgs { get; set; }
         public ComputeBuffer inDirectBuffer { get; set; }
 
-        private bool bFirstUpdate = false; 
+
+        public uint []cullResultList { get; set; }
+        public ComputeBuffer cullResultBuffer { get; set; }
+
 
         public void Init(MCRScene scene)
         {
@@ -52,10 +55,13 @@ namespace GPUDRP.MeshClusterRendering
 
             clusterList = new Unity.Collections.NativeArray<ClusterInfo>(ClusterCount, Unity.Collections.Allocator.Persistent);
             vertexList = new Unity.Collections.NativeArray<VertexInfo>(VertexCount, Unity.Collections.Allocator.Persistent);
+            cullResultList = new uint[ClusterCount + 1];
 
             indirectArgs = new List<uint> { 0, 0, 0, 0, 0 };
             vertexBuffer = ComputeBufferPool.GetTempBuffer(VertexCount, vertexStride);
             clusterBuffer = ComputeBufferPool.GetTempBuffer(ClusterCount, clusterStride);
+            cullResultBuffer = ComputeBufferPool.GetTempBuffer(ClusterCount + 1, 4);
+
             inDirectBuffer = ComputeBufferPool.GetIndirectBuffer();
 
             ClusterInfoAssetsPath = MCRConstant.BakeAssetSavePath + "/" + ClusterInfoAssetsPath;
@@ -67,6 +73,8 @@ namespace GPUDRP.MeshClusterRendering
             {
                 scene.StartCoroutine(LoadingBytes());
             }
+
+
             bLoadFinish = false;
             bDestroyed = false;
         }
@@ -121,24 +129,10 @@ namespace GPUDRP.MeshClusterRendering
             }
         }
 
-        public void UpdateBuffers()
-        {
-            if(!bFirstUpdate)
-            {
-                vertexBuffer.SetData<VertexInfo>(vertexList);
-                clusterBuffer.SetData<ClusterInfo>(clusterList);
-
-                indirectArgs[0] = MCRConstant.CLUSTER_VERTEX_COUNT;
-                indirectArgs[1] = (uint)ClusterCount;
-                inDirectBuffer.SetData<uint>(indirectArgs);
-
-                bFirstUpdate = true;
-            }
-        }
-
 
         public void Destroy()
         {
+
             bDestroyed = true;
             ComputeBuffer temp = vertexBuffer;
             ComputeBufferPool.ReleaseTempBuffer(ref temp);
@@ -146,12 +140,14 @@ namespace GPUDRP.MeshClusterRendering
             ComputeBufferPool.ReleaseTempBuffer(ref temp);
             temp = inDirectBuffer;
             ComputeBufferPool.ReleaseTempBuffer(ref temp);
+            temp = cullResultBuffer;
+            ComputeBufferPool.ReleaseTempBuffer(ref temp);
 
             clusterList.Dispose();
             vertexList.Dispose();
 
+            cullResultList = null;
             indirectArgs = null;
-            bFirstUpdate = false;
             bLoadFinish = false;
          
         }
