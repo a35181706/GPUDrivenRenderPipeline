@@ -1,5 +1,5 @@
-﻿#ifndef MCR_COMPUTESHADER_VARIABLES
-#define MCR_COMPUTESHADER_VARIABLES
+﻿#ifndef GPU_CULL_VARIABLES
+#define GPU_CULL_VARIABLES
 #include "Assets/GPUDRP/Shader/MeshClusterRendering/MCRStructer.cginc"
 
 //用来做裁剪的cluster

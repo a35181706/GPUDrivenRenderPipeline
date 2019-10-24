@@ -3,6 +3,8 @@
 #pragma kernel OcclusCull
 #pragma kernel Clear
 
+
+#include "Assets/GPUDRP/Shader/GPUCull/GPUCullConstant.cginc"
 #include "Assets/GPUDRP/Shader/GPUCull/GPUCullVariables.cginc"
 
 float FrustmTest(ClusterInfo info) {
@@ -22,7 +24,7 @@ float FrustmTest(ClusterInfo info) {
 	return 1;
 }
 
-[numthreads(8,8,1)]
+[numthreads(FRUSTUM_NUM_THREADS,1,1)]
 void FrustmCull (uint3 id : SV_DispatchThreadID)
 {
 

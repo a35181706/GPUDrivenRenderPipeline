@@ -14,6 +14,8 @@ namespace GPUDRP.GPUCull
         public static readonly string OcclusCullKernelName = "OcclusCull";
         public static readonly string ClearCullKernelName = "Clear";
 
+        public const int FrustmCullNumThread = MeshClusterRendering.MCRConstant.CLUSTER_TRANGLES_COUNT;
+
     }
 
 }
