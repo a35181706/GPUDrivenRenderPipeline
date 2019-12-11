@@ -19,6 +19,7 @@ namespace GPUDRP.MeshClusterRendering
         public static readonly int _MCRVertexBuffer = Shader.PropertyToID("_MCRVertexBuffer");
         public static readonly int _MCRClusterBuffer = Shader.PropertyToID("_MCRClusterBuffer");
         public static readonly int _MCRCullResultBuffer = Shader.PropertyToID("_MCRCullResultBuffer");
+        public static readonly int _MCRCullInstanceCountBuffer = Shader.PropertyToID("_MCRCullInstanceCountBuffer");
         
         /// <summary>
         /// MCR 资源你的保存路径

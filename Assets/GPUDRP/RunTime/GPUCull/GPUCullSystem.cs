@@ -14,10 +14,6 @@ namespace GPUDRP.GPUCull
 
         private static ComputeShader cullShader = null;
 
-        /// <summary>
-        /// GPU裁剪信息，x-cluster数目，yzw-尚未启用
-        /// </summary>
-        private static Vector4 gpuCullInfo;
         public static void Init()
         {
             if(bInit)
@@ -50,31 +46,40 @@ namespace GPUDRP.GPUCull
             bInit = false;
         }
 
+
         public static void Cull(MCRSceneContext context)
         {
             if(!bInit)
             {
                 return;
             }
-            //清理buffer
-            PipelineContext.mainCmdBuffer.DispatchCompute(cullShader, ClearKernel, 1, 1, 1);
-            //加0.001，避免精度丢失问题
-            gpuCullInfo.x = context.ClusterCount + 0.001f;
-
-            PipelineContext.mainCmdBuffer.SetComputeVectorParam(cullShader, GPUCull.GPUCullConstant._GPUCullInfo, gpuCullInfo);
-
+            PipelineContext.mainCmdBuffer.BeginSample("GPU-Cull");
+            ResetCullResult(context);
             FrustumCull(context);
             OcclusCull(context);
+
+            PipelineContext.mainCmdBuffer.EndSample ("GPU-Cull");
+            PipelineContext.ExecuteMainCommandBuffer();
+        }
+
+        private static void ResetCullResult(MCRSceneContext context)
+        {
+            PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader, ClearKernel, MCRConstant._MCRCullInstanceCountBuffer, context.cullInstanceCountBuffer);
+            //清理buffer
+            PipelineContext.mainCmdBuffer.DispatchCompute(cullShader, ClearKernel, 1, 1, 1);
         }
 
         private static void FrustumCull(MCRSceneContext context)
         {
             //设置buffer
-            PipelineContext.mainCmdBuffer.SetComputeVectorArrayParam(cullShader,GPUCull.GPUCullConstant._FrustumPlanes, PipelineContext.gpuCamera.frustumPlane);
-            PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader,FrustumKernerl,MCRConstant._MCRClusterBuffer, context.clusterBuffer);
+            PipelineContext.mainCmdBuffer.SetComputeVectorArrayParam(cullShader, GPUCull.GPUCullConstant._FrustumPlanes, PipelineContext.gpuCamera.frustumPlane);
+            PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader, FrustumKernerl, MCRConstant._MCRClusterBuffer, context.clusterBuffer);
             PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader, FrustumKernerl, MCRConstant._MCRCullResultBuffer, context.cullResultBuffer);
+            PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader, FrustumKernerl, MCRConstant._MCRCullInstanceCountBuffer, context.cullInstanceCountBuffer);
 
-            //PipelineContext.mainCmdBuffer.DispatchCompute(cullShader, FrustumKernerl, 1, 1, 1);
+            int val = context.ClusterCount / GPUCullConstant.FrustmCullNumThreads;
+            PipelineContext.mainCmdBuffer.DispatchCompute(cullShader, FrustumKernerl, val , 1, 1);
+            //PipelineContext.mainCmdBuffer.DispatchCompute(cullShader, FrustumKernerl, val, 1, 1);
         }
 
         private static void OcclusCull(MCRSceneContext context)

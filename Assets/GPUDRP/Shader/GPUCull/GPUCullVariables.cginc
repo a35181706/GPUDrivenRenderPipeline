@@ -7,10 +7,9 @@ StructuredBuffer<ClusterInfo> _MCRClusterBuffer;
 
 //裁剪输出buffer
 RWStructuredBuffer<uint> _MCRCullResultBuffer;
-
+//裁剪输出的裁剪buffer
+RWStructuredBuffer<uint> _MCRCullInstanceCountBuffer;
 //视椎体的六个面
-float4 _FrustumPlanes[6];
+shared float4 _FrustumPlanes[6];
 
-//GPU裁剪信息，x-cluster数目，yzw-尚未启用
-float4 _GPUCullInfo;
 #endif

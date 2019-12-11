@@ -54,7 +54,7 @@ namespace GPUDRP.MeshClusterRendering
                
             }
 
-            if (mcrScenecontext.bDestroyed)
+            if (null == mcrScenecontext || mcrScenecontext.bDestroyed)
             {
                 return;
             }

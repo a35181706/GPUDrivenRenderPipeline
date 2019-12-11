@@ -166,7 +166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   context:
     ClusterInfoAssetsPath: SampleScene_MCRBakeAsset.mcr
-    ClusterCount: 4033
+    ClusterCount: 4096
     VertexCount: 774336
 --- !u!1001 &474129499
 PrefabInstance:
@@ -416,8 +416,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779862927}
-  m_LocalRotation: {x: 0.13258329, y: -0.4045039, z: 0.05942808, w: 0.9029212}
-  m_LocalPosition: {x: 5.0473156, y: 3.1306133, z: -5.544483}
+  m_LocalRotation: {x: 0.016738415, y: -0.97650164, z: 0.08252848, w: 0.19837725}
+  m_LocalPosition: {x: 1.103611, y: 0.68083, z: 2.5696907}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

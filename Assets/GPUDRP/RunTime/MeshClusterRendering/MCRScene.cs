@@ -48,25 +48,20 @@ namespace GPUDRP.MeshClusterRendering
         public void Render()
         {
             GPUCull.GPUCullSystem.Cull(context);
-
-            PipelineContext.mainCmdBuffer.BeginSample("GPU-Cull");
-            PipelineContext.ExecuteMainCommandBuffer();
-            PipelineContext.mainCmdBuffer.EndSample("GPU-Cull");
-
-
+            
 
             PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRVertexBuffer, context.vertexBuffer);
-            PipelineContext.mainCmdBuffer.SetGlobalBuffer(MCRConstant._MCRCullResultBuffer, context.cullResultBuffer);
 
-            context.cullResultBuffer.GetData(context.cullResultList);
 
-            if(context.cullResultList[0] <= 0)
+            context.cullInstanceCountBuffer.GetData(context.instanceCount);
+
+            if (context.instanceCount[0] <= 0)
             {
                 return;
             }
 
             context.indirectArgs[0] = MCRConstant.CLUSTER_VERTEX_COUNT;
-            context.indirectArgs[1] = context.cullResultList[0];
+            context.indirectArgs[1] = context.instanceCount[0];
 
             context.inDirectBuffer.SetData<uint>(context.indirectArgs);
 

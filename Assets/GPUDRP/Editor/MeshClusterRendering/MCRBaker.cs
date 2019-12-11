@@ -169,6 +169,8 @@ namespace GPUDRP.MeshClusterRendering
                 allClusterList.Add(BuildCluster(allVertexList));
             }
 
+            AddRedundancyCluster(allClusterList);
+
             //保存cluster
             SaveClustetInfo(allClusterList, allVertexList,fullSavedAssetsPath);
             mcrScene.context.ClusterInfoAssetsPath = fullSavedAssetsPath.Replace(MCRConstant.BakeAssetSavePath + "/",string.Empty);
@@ -176,6 +178,29 @@ namespace GPUDRP.MeshClusterRendering
             mcrScene.context.VertexCount = allVertexList.Count; 
         }
 
+        /// <summary>
+        /// 增加冗余的cluster，为了保证computeshader每个线程都能获得同样数量的数据，最大化并行
+        /// </summary>
+        /// <param name="allClusterList"></param>
+        public void AddRedundancyCluster(List<ClusterInfo> allClusterList)
+        {
+            int cout = allClusterList.Count % GPUCull.GPUCullConstant.FrustmCullNumThreads;
+            if(cout != 0)
+            {
+                cout = GPUCull.GPUCullConstant.FrustmCullNumThreads - cout;
+                while(cout > 0)
+                {
+                    ClusterInfo info = new ClusterInfo();
+                    info.extent = 0;
+                    info.center = 0;
+                    info.clusterindex = 0;
+
+                    allClusterList.Add(info);
+
+                    cout--;
+                }
+            }
+        }
 
         public ClusterInfo BuildCluster(List<VertexInfo> allVertexList)
         {

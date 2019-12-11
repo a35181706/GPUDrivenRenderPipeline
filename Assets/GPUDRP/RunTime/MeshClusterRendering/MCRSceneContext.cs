@@ -44,9 +44,9 @@ namespace GPUDRP.MeshClusterRendering
         public ComputeBuffer inDirectBuffer { get; set; }
 
 
-        public uint []cullResultList { get; set; }
+        public uint []instanceCount { get; set; }
         public ComputeBuffer cullResultBuffer { get; set; }
-
+        public ComputeBuffer cullInstanceCountBuffer { get; set; }
 
         public void Init(MCRScene scene)
         {
@@ -55,13 +55,14 @@ namespace GPUDRP.MeshClusterRendering
 
             clusterList = new Unity.Collections.NativeArray<ClusterInfo>(ClusterCount, Unity.Collections.Allocator.Persistent);
             vertexList = new Unity.Collections.NativeArray<VertexInfo>(VertexCount, Unity.Collections.Allocator.Persistent);
-            cullResultList = new uint[ClusterCount + 1];
+            instanceCount = new uint[1];
 
             indirectArgs = new List<uint> { 0, 0, 0, 0, 0 };
             vertexBuffer = ComputeBufferPool.GetTempBuffer(VertexCount, vertexStride);
             clusterBuffer = ComputeBufferPool.GetTempBuffer(ClusterCount, clusterStride);
-            cullResultBuffer = ComputeBufferPool.GetTempBuffer(ClusterCount + 1, 4);
-
+            cullResultBuffer = ComputeBufferPool.GetTempBuffer(ClusterCount, 4);
+            cullInstanceCountBuffer = ComputeBufferPool.GetTempBuffer(1, 4);
+            cullInstanceCountBuffer.SetData(instanceCount);
             inDirectBuffer = ComputeBufferPool.GetIndirectBuffer();
 
             ClusterInfoAssetsPath = MCRConstant.BakeAssetSavePath + "/" + ClusterInfoAssetsPath;
@@ -142,11 +143,13 @@ namespace GPUDRP.MeshClusterRendering
             ComputeBufferPool.ReleaseTempBuffer(ref temp);
             temp = cullResultBuffer;
             ComputeBufferPool.ReleaseTempBuffer(ref temp);
+            temp = cullInstanceCountBuffer;
+            ComputeBufferPool.ReleaseTempBuffer(ref temp);
 
             clusterList.Dispose();
             vertexList.Dispose();
 
-            cullResultList = null;
+            instanceCount = null;
             indirectArgs = null;
             bLoadFinish = false;
          

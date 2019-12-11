@@ -10,7 +10,7 @@
 float FrustmTest(ClusterInfo info) {
 
 	float3 position = info.center.xyz;
-	float3 extent = info.extent.xyz;
+	float3 extent =  info.extent.xyz;
 	[unroll]
 	for (uint i = 0; i < 6; ++i)
 	{
@@ -27,7 +27,14 @@ float FrustmTest(ClusterInfo info) {
 [numthreads(FRUSTUM_NUM_THREADS,1,1)]
 void FrustmCull (uint3 id : SV_DispatchThreadID)
 {
-
+	ClusterInfo info = _MCRClusterBuffer[id.x];
+	//if (FrustmTest(info)<0.01)
+	{
+		uint tempIndex = 0;
+		InterlockedAdd(_MCRCullInstanceCountBuffer[0], 1, tempIndex);
+		_MCRCullResultBuffer[tempIndex] = id.x;
+	
+	}
 }
 
 [numthreads(8, 8, 1)]
@@ -39,5 +46,5 @@ void OcclusCull(uint3 id : SV_DispatchThreadID)
 [numthreads(1, 1, 1)]
 void Clear(uint3 id : SV_DispatchThreadID)
 {
-	_MCRCullResultBuffer[0] = 0;
+	_MCRCullInstanceCountBuffer[0] = 0;
 }
