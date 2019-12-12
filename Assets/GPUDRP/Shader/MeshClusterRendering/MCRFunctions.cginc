@@ -5,8 +5,6 @@
 #include "Assets/GPUDRP/Shader/MeshClusterRendering/MCRVariables.cginc"
 VertexInfo getVertex(uint vertexID, uint instanceID)
 {
-
-	//instanceID = resultBuffer[instanceID];
 	uint vertexOffset = instanceID * CLUSTER_VERTEX_COUNT;
 	return _MCRVertexBuffer[vertexOffset + vertexID];
 }

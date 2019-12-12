@@ -28,7 +28,7 @@ float FrustmTest(ClusterInfo info) {
 void FrustmCull (uint3 id : SV_DispatchThreadID)
 {
 	ClusterInfo info = _MCRClusterBuffer[id.x];
-	//if (FrustmTest(info)<0.01)
+	if (FrustmTest(info)<0.01)
 	{
 		uint tempIndex = 0;
 		InterlockedAdd(_MCRCullInstanceCountBuffer[0], 1, tempIndex);

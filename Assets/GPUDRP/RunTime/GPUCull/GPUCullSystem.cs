@@ -72,7 +72,9 @@ namespace GPUDRP.GPUCull
         private static void FrustumCull(MCRSceneContext context)
         {
             //设置buffer
-            PipelineContext.mainCmdBuffer.SetComputeVectorArrayParam(cullShader, GPUCull.GPUCullConstant._FrustumPlanes, PipelineContext.gpuCamera.frustumPlane);
+            PipelineContext.mainCmdBuffer.SetComputeVectorArrayParam(cullShader, 
+                                                                    GPUCull.GPUCullConstant._FrustumPlanes, 
+                                                                    PipelineContext.gpuCamera.frustumPlane);
             PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader, FrustumKernerl, MCRConstant._MCRClusterBuffer, context.clusterBuffer);
             PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader, FrustumKernerl, MCRConstant._MCRCullResultBuffer, context.cullResultBuffer);
             PipelineContext.mainCmdBuffer.SetComputeBufferParam(cullShader, FrustumKernerl, MCRConstant._MCRCullInstanceCountBuffer, context.cullInstanceCountBuffer);

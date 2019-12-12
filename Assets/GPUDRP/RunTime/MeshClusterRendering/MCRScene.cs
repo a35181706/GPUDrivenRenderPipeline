@@ -7,6 +7,7 @@ namespace GPUDRP.MeshClusterRendering
 {
     public class MCRScene : MonoBehaviour
     {
+        public bool CanRender = true;
         public MCRSceneContext context;
 
         public MCRPipelineAssets pipelineAsset
@@ -47,6 +48,10 @@ namespace GPUDRP.MeshClusterRendering
 
         public void Render()
         {
+            if(!CanRender)
+            {
+                return;
+            }
             GPUCull.GPUCullSystem.Cull(context);
             
 
